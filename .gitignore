@@ -39,3 +39,5 @@ captures/
 .idea
 
 .kotlin/
+# Local test captures
+*.obu
