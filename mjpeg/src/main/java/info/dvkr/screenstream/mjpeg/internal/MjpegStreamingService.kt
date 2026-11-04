@@ -260,8 +260,9 @@ internal class MjpegStreamingService(
         }
         mjpegSettings.data.map { it.videoCodec }.listenForChange(coroutineScope, 1) {
             // Capture pipeline differs per codec: stop the stream and reload web clients so they pick up the new mode
-            sendEvent(MjpegEvent.Intentable.StopStream("VideoCodecChanged"))
+            // RestartServer drops queued RESTART_IGNORE events, so it must be sent before StopStream
             sendEvent(InternalEvent.RestartServer(RestartReason.SettingsChanged(MjpegSettings.Key.VIDEO_CODEC.name)))
+            sendEvent(MjpegEvent.Intentable.StopStream("VideoCodecChanged"))
         }
         mjpegSettings.data.map { it.serverPort }.listenForChange(coroutineScope, 1) {
             sendEvent(InternalEvent.RestartServer(RestartReason.NetworkSettingsChanged(MjpegSettings.Key.SERVER_PORT.name)))
