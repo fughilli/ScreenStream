@@ -355,7 +355,11 @@ internal class HttpServer(
         install(CachingHeaders) { options { _, _ -> CachingOptions(CacheControl.NoStore(CacheControl.Visibility.Private)) } }
         install(DefaultHeaders) {
             header("X-Content-Type-Options", "nosniff")
-            header("X-Frame-Options", "SAMEORIGIN")
+            // Framing: this origin, plus pages served from the viewing computer itself (e.g. a presentation
+            // dashboard on http://localhost:7420 that shows the phone in an iframe). A page on any other
+            // site still can't frame the viewer. frame-ancestors replaces X-Frame-Options, which can't
+            // express an allowlist.
+            header("Content-Security-Policy", "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:*")
             header("Referrer-Policy", "no-referrer")
         }
         // No ForwardedHeaders: this server is never behind a proxy, and trusting `Forwarded` lets clients spoof their IP.
